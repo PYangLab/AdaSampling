@@ -33,6 +33,7 @@
 #' AdaSampling for positive-unlabeled and label noise learning with bioinformatics applications. 
 #' \emph{IEEE Transactions on Cybernetics}, doi:10.1109/TCYB.2018.2816984
 #'
+#' @import stats
 #'
 #' @param data.mat a rectangular matrix or data frame that can be
 #' coerced to a matrix, containing the

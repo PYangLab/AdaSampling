@@ -3,8 +3,8 @@
 #' (N) instance, as a two column data frame.
 #'
 #' Classification algorithms included are support vector machines (svm),
-#' k-nearest neighbours (knn), logistic regression (logit), and linear discriminant
-#' analysis (lda).
+#' k-nearest neighbours (knn), logistic regression (logit), linear discriminant
+#' analysis (lda), feature weighted knn (wKNN).
 
 #' @section References:
 #' Yang, P., Liu, W., Yang. J. (2017) Positive unlabeled learning via wrapper-based
@@ -14,6 +14,11 @@
 #' AdaSampling for positive-unlabeled and label noise learning with bioinformatics applications. 
 #' \emph{IEEE Transactions on Cybernetics}, doi:10.1109/TCYB.2018.2816984
 #'
+#' @import class
+#' @import e1071
+#' @import MASS
+#' @import caret
+#'
 #' @param Ps names (name as index) of positive examples
 #' @param Ns names (name as index) of negative examples
 #' @param dat training data matrix, without class labels.
@@ -22,13 +27,14 @@
 #' @param pos.probs a numeric vector of containing probability of positive examples been positive
 #' @param una.probs a numeric vector of containing probability of negative or unannotated examples been negative
 #' @param classifier classification algorithm to be used for learning. Current options are
-#' support vector machine, \code{"svm"}, k-nearest neighbour, \code{"knn"}, logistic regression \code{"logit"}, or
-#' linear discriminant analysis \code{"lda"}.
+#' support vector machine, \code{"svm"}, k-nearest neighbour, \code{"knn"}, logistic regression \code{"logit"},
+#' linear discriminant analysis \code{"lda"}, and feature weighted knn, \code{"wKNN"}.
 #' @param sampleFactor provides a control on the sample size for resampling.
 #' @param seed sets the seed.
+#' @param weights feature weights, required when using weighted knn.
 #' @export
 
-singleIter <- function(Ps, Ns, dat, test=NULL, pos.probs=NULL, una.probs=NULL, classifier="svm", sampleFactor, seed) {
+singleIter <- function(Ps, Ns, dat, test=NULL, pos.probs=NULL, una.probs=NULL, classifier="svm", sampleFactor, seed, weights) {
   set.seed(seed);
   
   positive.train <- c()
@@ -121,6 +127,21 @@ singleIter <- function(Ps, Ns, dat, test=NULL, pos.probs=NULL, una.probs=NULL, c
       colnames(lda.pred) <- c("N", "P")
       rownames(lda.pred) <- rownames(test)
       return(lda.pred)
+    }
+  } else if (classifier == "wKNN") {
+    # training a modified knn classifier
+    if (is.null(weights)) {
+      stop("need to specify weights for using weighted knn!");
+    }
+    if (is.null(test)) {
+      wKNN.pred <- weightedKNN(train.sample, dat, cl=cls, k=3, weights)
+      rownames(wKNN.pred) <- rownames(dat)
+      return(wKNN.pred)
+    } else {
+      test.mat <- test
+      wKNN.pred <- weightedKNN(train.sample, test.mat, cl=cls, k=3, weights)
+      rownames(wKNN.pred) <- rownames(test)
+      return(wKNN.pred)
     }
   }
 }

@@ -6,8 +6,8 @@
 returns the probabilities of all samples as being a positive (P) or negative
 (N) instance, as a two column data frame.}
 \usage{
-singleIter(Ps, Ns, dat, test = NULL, pos.probs = NULL, una.probs = NULL,
-  classifier = "svm", sampleFactor, seed)
+singleIter(Ps, Ns, dat, test = NULL, pos.probs = NULL,
+  una.probs = NULL, classifier = "svm", sampleFactor, seed, weights)
 }
 \arguments{
 \item{Ps}{names (name as index) of positive examples}
@@ -24,17 +24,19 @@ Training data matrix will be used for testing if this is NULL (default).}
 \item{una.probs}{a numeric vector of containing probability of negative or unannotated examples been negative}
 
 \item{classifier}{classification algorithm to be used for learning. Current options are
-support vector machine, \code{"svm"}, k-nearest neighbour, \code{"knn"}, logistic regression \code{"logit"}, or
-linear discriminant analysis \code{"lda"}.}
+support vector machine, \code{"svm"}, k-nearest neighbour, \code{"knn"}, logistic regression \code{"logit"},
+linear discriminant analysis \code{"lda"}, and feature weighted knn, \code{"wKNN"}.}
 
 \item{sampleFactor}{provides a control on the sample size for resampling.}
 
 \item{seed}{sets the seed.}
+
+\item{weights}{feature weights, required when using weighted knn.}
 }
 \description{
 Classification algorithms included are support vector machines (svm),
-k-nearest neighbours (knn), logistic regression (logit), and linear discriminant
-analysis (lda).
+k-nearest neighbours (knn), logistic regression (logit), linear discriminant
+analysis (lda), feature weighted knn (wKNN).
 }
 \section{References}{
 

@@ -5,27 +5,29 @@
 \title{Implementation of AdaSampling for positive unlabelled and label noise
 learning.}
 \usage{
-adaSample(Ps, Ns, train.mat, test.mat, classifier = "svm", s = 1, C = 1,
-  sampleFactor = 1)
+adaSample(Ps, Ns, train.mat, test.mat, classifier = "svm", s = 1,
+  C = 1, sampleFactor = 1, weights = NULL)
 }
 \arguments{
-\item{Ps}{names (name as index) of positive examples}
+\item{Ps}{names (each instance in the data has to be named) of positive examples}
 
-\item{Ns}{names (name as index) of negative examples}
+\item{Ns}{names (each instance in the data has to be named) of negative examples}
 
 \item{train.mat}{training data matrix, without class labels.}
 
 \item{test.mat}{test data matrix, without class labels.}
 
 \item{classifier}{classification algorithm to be used for learning. Current options are
-support vector machine, \code{"svm"}, k-nearest neighbour, \code{"knn"}, logistic regression \code{"logit"}, or
-linear discriminant analysis \code{"lda"}.}
+support vector machine, \code{"svm"}, k-nearest neighbour, \code{"knn"}, logistic regression \code{"logit"},
+linear discriminant analysis \code{"lda"}, and feature weighted knn, \code{"wKNN"}.}
 
 \item{s}{sets the seed.}
 
 \item{C}{sets how many times to run the classifier, C>1 induces an ensemble learning model.}
 
 \item{sampleFactor}{provides a control on the sample size for resampling.}
+
+\item{weights}{feature weights, required when using weighted knn.}
 }
 \value{
 a two column matrix providing classification probabilities of each sample 

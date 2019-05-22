@@ -33,16 +33,18 @@
 #' AdaSampling for positive-unlabeled and label noise learning with bioinformatics applications. 
 #' \emph{IEEE Transactions on Cybernetics}, doi:10.1109/TCYB.2018.2816984
 #'
-#' @param Ps names (name as index) of positive examples
-#' @param Ns names (name as index) of negative examples
+#' @param Ps names (each instance in the data has to be named) of positive examples
+#' @param Ns names (each instance in the data has to be named) of negative examples
 #' @param train.mat training data matrix, without class labels.
 #' @param test.mat test data matrix, without class labels.
 #' @param classifier classification algorithm to be used for learning. Current options are
-#' support vector machine, \code{"svm"}, k-nearest neighbour, \code{"knn"}, logistic regression \code{"logit"}, or
-#' linear discriminant analysis \code{"lda"}.
+#' support vector machine, \code{"svm"}, k-nearest neighbour, \code{"knn"}, logistic regression \code{"logit"},
+#' linear discriminant analysis \code{"lda"}, and feature weighted knn, \code{"wKNN"}.
 #' @param s sets the seed.
 #' @param C sets how many times to run the classifier, C>1 induces an ensemble learning model.
 #' @param sampleFactor provides a control on the sample size for resampling.
+#' @param weights feature weights, required when using weighted knn.
+#' 
 #' @return a two column matrix providing classification probabilities of each sample 
 #' with respect to positive and negative classes
 #' @export
@@ -80,7 +82,7 @@
 #' accuracyWithAdaSample <- sum(ifelse(brca.preds[,"P"] > 0.5, 1, 0) == brca.cls) / length(brca.cls)
 #' accuracyWithAdaSample
 #' 
-adaSample <- function(Ps, Ns, train.mat, test.mat, classifier="svm", s=1, C=1, sampleFactor=1) {
+adaSample <- function(Ps, Ns, train.mat, test.mat, classifier="svm", s=1, C=1, sampleFactor=1, weights=NULL) {
 
   # checking the input
   if(ncol(train.mat) != ncol(test.mat)) {stop("train.mat and test.mat do not have the same number of columns")}
@@ -97,7 +99,7 @@ adaSample <- function(Ps, Ns, train.mat, test.mat, classifier="svm", s=1, C=1, s
     i <- i + 1
     # training the predictive model
     model <- singleIter(Ps=Ps, Ns=Ns, dat=train.mat, pos.probs=pos.probs,
-                 una.probs=una.probs, seed=i, classifier=classifier, sampleFactor=sampleFactor)
+                 una.probs=una.probs, seed=i, classifier=classifier, sampleFactor=sampleFactor, weights=weights)
 
     # update probability arrays
     pos.probs <- model[Ps, "P"]
@@ -105,13 +107,13 @@ adaSample <- function(Ps, Ns, train.mat, test.mat, classifier="svm", s=1, C=1, s
   }
 
   pred <- singleIter(Ps=Ps, Ns=Ns, dat=train.mat, test=test.mat,
-              pos.probs=pos.probs, una.probs=una.probs, seed=s, classifier=classifier, sampleFactor=sampleFactor)
+              pos.probs=pos.probs, una.probs=una.probs, seed=s, classifier=classifier, sampleFactor=sampleFactor, weights=weights)
 
   # if C is greater than 1, create an ensemble
   if (C > 1){
     for (j in 2:C){
       pred <- pred + singleIter(Ps=Ps, Ns=Ns, dat=train.mat, test=test.mat,
-                pos.probs=pos.probs, una.probs=una.probs, seed=j, classifier=classifier, sampleFactor=sampleFactor)
+                pos.probs=pos.probs, una.probs=una.probs, seed=j, classifier=classifier, sampleFactor=sampleFactor, weights=weights)
     }
     pred <- pred/C
   }
